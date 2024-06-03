@@ -1,16 +1,19 @@
+import { Balance, CalendarContent, Transaction } from "../types";
+import { calculateDailyBalances } from "../utils/financeCalculations";
+import { formatCurrency } from "../utils/formatting";
+import "../calendar.css";
+
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import jaLocale from "@fullcalendar/core/locales/ja";
-import "../calendar.css";
-import { EventContentArg } from "@fullcalendar/core";
-import { calculateDailyBalances } from "../utils/financeCalculations";
-import { Transaction } from "../types";
+import { DatesSetArg, EventContentArg } from "@fullcalendar/core";
 
 interface CalendarProps {
   monthlyTransactions: Transaction[];
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
 }
 
-const Calendar = ({ monthlyTransactions }: CalendarProps) => {
+const Calendar = ({ monthlyTransactions, setCurrentMonth }: CalendarProps) => {
   const events = [
     {
       title: "Meeting",
@@ -25,8 +28,30 @@ const Calendar = ({ monthlyTransactions }: CalendarProps) => {
   const dailyBalances = calculateDailyBalances(monthlyTransactions);
   console.log(dailyBalances);
 
+  // FullcCalendar用のイベントを生成
+  const createCalendarEvents = (
+    dailyBalances: Record<string, Balance>
+  ): CalendarContent[] => {
+    return Object.keys(dailyBalances).map((date) => {
+      const { income, expense, balance } = dailyBalances[date];
+      return {
+        start: date,
+        income: formatCurrency(income),
+        expense: formatCurrency(expense),
+        balance: formatCurrency(balance),
+      };
+    });
+  };
+
+  const calendarEvents = createCalendarEvents(dailyBalances);
+
+  const handleDatesSet = (datesSetInfo: DatesSetArg) => {
+    console.log(datesSetInfo);
+    setCurrentMonth(datesSetInfo.view.currentStart);
+  };
+
   const renderEventContent = (eventInfo: EventContentArg) => {
-    console.log(eventInfo);
+    // console.log(eventInfo);
     return (
       <div>
         <div className="money" id="event-income">
@@ -41,13 +66,15 @@ const Calendar = ({ monthlyTransactions }: CalendarProps) => {
       </div>
     );
   };
+
   return (
     <FullCalendar
       locale={jaLocale}
       plugins={[dayGridPlugin]}
       initialView="dayGridMonth"
-      events={events}
+      events={calendarEvents}
       eventContent={renderEventContent}
+      datesSet={handleDatesSet}
     />
   );
 };
