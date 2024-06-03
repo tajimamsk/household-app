@@ -15,7 +15,7 @@ interface HomeProps {
 const Home = ({ monthlyTransactions, setCurrentMonth }: HomeProps) => {
   const today = format(new Date(), "yyyy-MM-dd");
   const [currentDay, setCurrentDay] = useState(today);
-  console.log(today);
+  // console.log(today);
 
   const dailyTransactions = monthlyTransactions.filter((transaction) => {
     return transaction.date === currentDay;
@@ -33,6 +33,7 @@ const Home = ({ monthlyTransactions, setCurrentMonth }: HomeProps) => {
           setCurrentMonth={setCurrentMonth}
           currentDay={currentDay}
           setCurrentDay={setCurrentDay}
+          today={today}
         />
       </Box>
 

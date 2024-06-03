@@ -10,12 +10,14 @@ import { DatesSetArg, EventContentArg } from "@fullcalendar/core";
 import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
 import { Palette } from "@mui/icons-material";
 import { useTheme } from "@mui/material";
+import { isSameMonth } from "date-fns";
 
 interface CalendarProps {
   monthlyTransactions: Transaction[];
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
   currentDay: string;
   setCurrentDay: React.Dispatch<React.SetStateAction<string>>;
+  today: string;
 }
 
 const Calendar = ({
@@ -23,6 +25,7 @@ const Calendar = ({
   setCurrentMonth,
   currentDay,
   setCurrentDay,
+  today,
 }: CalendarProps) => {
   const theme = useTheme();
 
@@ -48,8 +51,13 @@ const Calendar = ({
   const calendarEvents = createCalendarEvents(dailyBalances);
 
   const handleDatesSet = (datesSetInfo: DatesSetArg) => {
-    console.log(datesSetInfo);
+    const currentMonth = datesSetInfo.view.currentStart;
+    // console.log(datesSetInfo.view.currentStart);
     setCurrentMonth(datesSetInfo.view.currentStart);
+    const todayDate = new Date();
+    if (isSameMonth(todayDate, currentMonth)) {
+      setCurrentDay(today);
+    }
   };
 
   const handleDateClick = (dateInfo: DateClickArg) => {
