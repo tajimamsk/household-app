@@ -7,22 +7,27 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import jaLocale from "@fullcalendar/core/locales/ja";
 import { DatesSetArg, EventContentArg } from "@fullcalendar/core";
+import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
+import { Palette } from "@mui/icons-material";
+import { useTheme } from "@mui/material";
+import { isSameMonth } from "date-fns";
 
 interface CalendarProps {
   monthlyTransactions: Transaction[];
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
+  currentDay: string;
+  setCurrentDay: React.Dispatch<React.SetStateAction<string>>;
+  today: string;
 }
 
-const Calendar = ({ monthlyTransactions, setCurrentMonth }: CalendarProps) => {
-  const events = [
-    {
-      title: "Meeting",
-      start: new Date(),
-      income: 500,
-      expense: 400,
-      balance: 100,
-    },
-  ];
+const Calendar = ({
+  monthlyTransactions,
+  setCurrentMonth,
+  currentDay,
+  setCurrentDay,
+  today,
+}: CalendarProps) => {
+  const theme = useTheme();
 
   // 月の取引データ
   const dailyBalances = calculateDailyBalances(monthlyTransactions);
@@ -46,8 +51,24 @@ const Calendar = ({ monthlyTransactions, setCurrentMonth }: CalendarProps) => {
   const calendarEvents = createCalendarEvents(dailyBalances);
 
   const handleDatesSet = (datesSetInfo: DatesSetArg) => {
-    console.log(datesSetInfo);
+    const currentMonth = datesSetInfo.view.currentStart;
+    // console.log(datesSetInfo.view.currentStart);
     setCurrentMonth(datesSetInfo.view.currentStart);
+    const todayDate = new Date();
+    if (isSameMonth(todayDate, currentMonth)) {
+      setCurrentDay(today);
+    }
+  };
+
+  const handleDateClick = (dateInfo: DateClickArg) => {
+    // console.log(dateInfo);
+    setCurrentDay(dateInfo.dateStr);
+  };
+
+  const backGroundEvent = {
+    start: currentDay,
+    display: "background",
+    backGroundColor: theme.palette.incomeColor.light,
   };
 
   const renderEventContent = (eventInfo: EventContentArg) => {
@@ -67,14 +88,17 @@ const Calendar = ({ monthlyTransactions, setCurrentMonth }: CalendarProps) => {
     );
   };
 
+  console.log([...calendarEvents, backGroundEvent]);
+
   return (
     <FullCalendar
       locale={jaLocale}
-      plugins={[dayGridPlugin]}
+      plugins={[dayGridPlugin, interactionPlugin]}
       initialView="dayGridMonth"
-      events={calendarEvents}
+      events={[...calendarEvents, backGroundEvent]}
       eventContent={renderEventContent}
       datesSet={handleDatesSet}
+      dateClick={handleDateClick}
     />
   );
 };
