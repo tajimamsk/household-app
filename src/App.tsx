@@ -1,17 +1,17 @@
+import { useEffect, useState } from "react";
+import { Transaction } from "./types";
 import "./App.css";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Report from "./pages/Report";
 import NoMatch from "./pages/NoMatch";
 import AppLayout from "./components/layout/AppLayout";
 import { theme } from "./theme/theme";
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import { useEffect, useState } from "react";
-import { Transaction } from "./types";
-import { collection, getDocs } from "firebase/firestore";
 import { db } from "./firebase";
-import { format } from "date-fns";
 import { formatMonth } from "./utils/formatting";
+
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 
 function App() {
   // 型ガード
@@ -55,6 +55,7 @@ function App() {
   const monthlyTransactions = transactions.filter((transaction) => {
     return transaction.date.startsWith(formatMonth(currentMonth));
   });
+  console.log(transactions);
   console.log(monthlyTransactions);
 
   return (
@@ -65,7 +66,12 @@ function App() {
           <Route path="/" element={<AppLayout />}>
             <Route
               index
-              element={<Home monthlyTransactions={monthlyTransactions} />}
+              element={
+                <Home
+                  monthlyTransactions={monthlyTransactions}
+                  setCurrentMonth={setCurrentMonth}
+                />
+              }
             />
             <Route path="/report" element={<Report />} />
             <Route path="*" element={<NoMatch />} />

@@ -64,7 +64,7 @@ const SideBar = ({
           <NavLink
             to={item.path}
             style={({ isActive }) => {
-              console.log("選択されたメニューは", item.text, isActive);
+              // console.log("選択されたメニューは", item.text, isActive);
               return {
                 ...baseLinkStyle,
                 ...(isActive ? activeLinkStyle : {}),
