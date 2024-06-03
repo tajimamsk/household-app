@@ -1,11 +1,16 @@
 import FullCalendar from "@fullcalendar/react";
-import React from "react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import jaLocale from "@fullcalendar/core/locales/ja";
 import "../calendar.css";
 import { EventContentArg } from "@fullcalendar/core";
+import { calculateDailyBalances } from "../utils/financeCalculations";
+import { Transaction } from "../types";
 
-const Calendar = () => {
+interface CalendarProps {
+  monthlyTransactions: Transaction[];
+}
+
+const Calendar = ({ monthlyTransactions }: CalendarProps) => {
   const events = [
     {
       title: "Meeting",
@@ -15,6 +20,11 @@ const Calendar = () => {
       balance: 100,
     },
   ];
+
+  // 月の取引データ
+  const dailyBalances = calculateDailyBalances(monthlyTransactions);
+  console.log(dailyBalances);
+
   const renderEventContent = (eventInfo: EventContentArg) => {
     console.log(eventInfo);
     return (
