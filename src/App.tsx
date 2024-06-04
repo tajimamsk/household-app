@@ -10,8 +10,9 @@ import { db } from "./firebase";
 import { formatMonth } from "./utils/formatting";
 
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 import { CssBaseline, ThemeProvider } from "@mui/material";
+import { Schema } from "./validations/schema";
 
 function App() {
   // 型ガード
@@ -52,11 +53,41 @@ function App() {
     fetchTransactions();
   }, []);
 
+  // 一月分のデータ取得
   const monthlyTransactions = transactions.filter((transaction) => {
     return transaction.date.startsWith(formatMonth(currentMonth));
   });
-  console.log(transactions);
-  console.log(monthlyTransactions);
+
+  // 取引を保存する処理
+  const handleSaveTransaction = async (transaction: Schema) => {
+    console.log(transaction);
+    try {
+      // firestoreにデータを保存
+      const docRef = await addDoc(collection(db, "Transactions"), transaction);
+      console.log(docRef.id);
+
+      // 空文字はバリデーションで弾かれるので型アサーションでok
+      const newTransaction = {
+        id: docRef.id,
+        ...transaction,
+      } as Transaction;
+      // console.log(newTransaction);
+
+      setTransactions((prevTransactions) => [
+        ...prevTransactions,
+        newTransaction,
+      ]);
+    } catch (err) {
+      // error
+      if (isFireStoreError(err)) {
+        console.error("firebaseのエラーは:", err);
+        console.error(err.message);
+        console.error(err.code);
+      } else {
+        console.error("一般的なエラーは：", err);
+      }
+    }
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -70,6 +101,7 @@ function App() {
                 <Home
                   monthlyTransactions={monthlyTransactions}
                   setCurrentMonth={setCurrentMonth}
+                  onSaveTransaction={handleSaveTransaction}
                 />
               }
             />
