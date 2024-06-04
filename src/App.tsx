@@ -10,7 +10,13 @@ import { db } from "./firebase";
 import { formatMonth } from "./utils/formatting";
 
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+} from "firebase/firestore";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { Schema } from "./validations/schema";
 
@@ -89,6 +95,26 @@ function App() {
     }
   };
 
+  const handleDeleteTransaction = async (transactionId: string) => {
+    try {
+      // fireStoreのデータ削除
+      await deleteDoc(doc(db, "Transactions", transactionId));
+      const filteredTransactions = transactions.filter(
+        (transaction) => transaction.id !== transactionId
+      );
+      // console.log(filteredTransactions);
+      setTransactions(filteredTransactions);
+    } catch (err) {
+      if (isFireStoreError(err)) {
+        console.error("firebaseのエラーは:", err);
+        console.error(err.message);
+        console.error(err.code);
+      } else {
+        console.error("一般的なエラーは：", err);
+      }
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -102,6 +128,7 @@ function App() {
                   monthlyTransactions={monthlyTransactions}
                   setCurrentMonth={setCurrentMonth}
                   onSaveTransaction={handleSaveTransaction}
+                  onDeleteTransaction={handleDeleteTransaction}
                 />
               }
             />
