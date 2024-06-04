@@ -16,6 +16,7 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  updateDoc,
 } from "firebase/firestore";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { Schema } from "./validations/schema";
@@ -95,6 +96,7 @@ function App() {
     }
   };
 
+  // 削除処理
   const handleDeleteTransaction = async (transactionId: string) => {
     try {
       // fireStoreのデータ削除
@@ -104,6 +106,30 @@ function App() {
       );
       // console.log(filteredTransactions);
       setTransactions(filteredTransactions);
+    } catch (err) {
+      if (isFireStoreError(err)) {
+        console.error("firebaseのエラーは:", err);
+        console.error(err.message);
+        console.error(err.code);
+      } else {
+        console.error("一般的なエラーは：", err);
+      }
+    }
+  };
+
+  // 更新処理
+  const handleUpdateTransaction = async (
+    transaction: Schema,
+    transactionId: string
+  ) => {
+    try {
+      // firedtore更新処理
+      await updateDoc(doc(db, "Transactions", transactionId), transaction);
+      // フロント更新
+      const updatedTransactions = transactions.map((t) =>
+        t.id === transactionId ? { ...t, ...transaction } : t
+      ) as Transaction[];
+      setTransactions(updatedTransactions);
     } catch (err) {
       if (isFireStoreError(err)) {
         console.error("firebaseのエラーは:", err);
@@ -129,6 +155,7 @@ function App() {
                   setCurrentMonth={setCurrentMonth}
                   onSaveTransaction={handleSaveTransaction}
                   onDeleteTransaction={handleDeleteTransaction}
+                  onUpdateTransaction={handleUpdateTransaction}
                 />
               }
             />
