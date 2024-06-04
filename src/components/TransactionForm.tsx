@@ -14,6 +14,7 @@ import FastfoodIcon from "@mui/icons-material/Fastfood"; //食事アイコン
 import { Controller, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { ExpenseCategory, IncomeCategory } from "../types";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import AlarmIcon from "@mui/icons-material/Alarm";
 import AddHomeIcon from "@mui/icons-material/AddHome";
@@ -23,6 +24,7 @@ import TrainIcon from "@mui/icons-material/Train";
 import WorkIcon from "@mui/icons-material/Work";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import SavingsIcon from "@mui/icons-material/Savings";
+import { transactionSchema } from "../validations/schema";
 
 interface TransactionFormProps {
   onCloseForm: () => void;
@@ -87,7 +89,13 @@ const TransactionForm = ({
 
   const [categories, setCategories] = useState(expenseCategories);
 
-  const { control, setValue, watch } = useForm({
+  const {
+    control,
+    setValue,
+    watch,
+    formState: { errors },
+    handleSubmit,
+  } = useForm({
     defaultValues: {
       type: "expense",
       date: currentDay,
@@ -95,7 +103,9 @@ const TransactionForm = ({
       category: "",
       content: "",
     },
+    resolver: zodResolver(transactionSchema),
   });
+  console.log(errors);
 
   const incomeExpenseToggle = (type: IncomeExpense) => {
     setValue("type", type);
@@ -114,6 +124,10 @@ const TransactionForm = ({
       currentType === "expense" ? expenseCategories : incomeCategories;
     setCategories(newCategories);
   }, [currentType]);
+
+  const onSubmit = (data: any) => {
+    console.log(data);
+  };
 
   return (
     <Box
@@ -150,7 +164,7 @@ const TransactionForm = ({
       </Box>
 
       {/* フォーム要素 */}
-      <Box component={"form"}>
+      <Box component={"form"} onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
           {/* 収支切り替えボタン */}
           <Controller
@@ -195,6 +209,8 @@ const TransactionForm = ({
                 InputLabelProps={{
                   shrink: true,
                 }}
+                error={!!errors.date}
+                helperText={errors.date?.message}
               />
             )}
           />
@@ -204,7 +220,14 @@ const TransactionForm = ({
             name="category"
             control={control}
             render={({ field }) => (
-              <TextField {...field} id="カテゴリ" label="カテゴリ" select>
+              <TextField
+                {...field}
+                id="カテゴリ"
+                label="カテゴリ"
+                select
+                error={!!errors.category}
+                helperText={errors.category?.message}
+              >
                 {categories.map((category) => (
                   <MenuItem value={category.label} key={category.label}>
                     <ListItemIcon>{category.icon}</ListItemIcon>
@@ -229,6 +252,8 @@ const TransactionForm = ({
                 }}
                 label="金額"
                 type="number"
+                error={!!errors.amount}
+                helperText={errors.amount?.message}
               />
             )}
           />
@@ -238,7 +263,13 @@ const TransactionForm = ({
             name="content"
             control={control}
             render={({ field }) => (
-              <TextField {...field} label="内容" type="text" />
+              <TextField
+                {...field}
+                label="内容"
+                type="text"
+                error={!!errors.content}
+                helperText={errors.content?.message}
+              />
             )}
           />
 
