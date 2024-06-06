@@ -7,9 +7,13 @@ import {
   Box,
   Button,
   ButtonGroup,
+  FormControl,
+  FormHelperText,
   IconButton,
+  InputLabel,
   ListItemIcon,
   MenuItem,
+  Select,
   Stack,
   TextField,
   Typography,
@@ -302,21 +306,42 @@ const TransactionForm = ({
             name="category"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                id="カテゴリ"
-                label="カテゴリ"
-                select
-                error={!!errors.category}
-                helperText={errors.category?.message}
-              >
-                {categories.map((category) => (
-                  <MenuItem value={category.label} key={category.label}>
-                    <ListItemIcon>{category.icon}</ListItemIcon>
-                    {category.label}
-                  </MenuItem>
-                ))}
-              </TextField>
+              // <TextField
+              //   {...field}
+              //   id="category-select"
+              //   label="カテゴリ"
+              //   select
+              //   error={!!errors.category}
+              //   helperText={errors.category?.message}
+              //   InputLabelProps={{
+              //     htmlFor: "category",
+              //   }}
+              //   inputProps={{ id: "category" }}
+              // >
+              //   {categories.map((category) => (
+              //     <MenuItem value={category.label} key={category.label}>
+              //       <ListItemIcon>{category.icon}</ListItemIcon>
+              //       {category.label}
+              //     </MenuItem>
+              //   ))}
+              // </TextField>
+              <FormControl fullWidth error={!!errors.category}>
+                <InputLabel id="category-select-label">カテゴリ</InputLabel>
+                <Select
+                  {...field}
+                  labelId="category-select-label"
+                  id="category-select"
+                  label="カテゴリ"
+                >
+                  {categories.map((category, index) => (
+                    <MenuItem value={category.label} key={index}>
+                      <ListItemIcon>{category.icon}</ListItemIcon>
+                      {category.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>{errors.category?.message}</FormHelperText>
+              </FormControl>
             )}
           />
 
