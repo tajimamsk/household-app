@@ -4,9 +4,10 @@ import MonthlySummary from "../components/MonthlySummary";
 import Calendar from "../components/Calendar";
 import TransactionForm from "../components/TransactionForm";
 import TransactionMenu from "../components/TransactionMenu";
-import { Box } from "@mui/material";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { format } from "date-fns";
 import { Schema } from "../validations/schema";
+import { DateClickArg } from "@fullcalendar/interaction";
 
 interface HomeProps {
   monthlyTransactions: Transaction[];
@@ -34,7 +35,13 @@ const Home = ({
   const [isEntryDrawerOpen, setIsEntryDrawerOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
+  // console.log(isMobile);
+
+  // １日分のデータ取得
   const dailyTransactions = monthlyTransactions.filter((transaction) => {
     return transaction.date === currentDay;
   });
@@ -64,6 +71,17 @@ const Home = ({
     setSelectedTransaction(transaction);
   };
 
+  /** モバイル用Drawerを閉じる処理 */
+  const handleCloseMobileDrawer = () => {
+    setIsMobileDrawerOpen(false);
+  };
+
+  /** 日付を選択した時の処理 */
+  const handleDateClick = (dateInfo: DateClickArg) => {
+    setCurrentDay(dateInfo.dateStr);
+    setIsMobileDrawerOpen(true);
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
       {/* 左 */}
@@ -75,6 +93,7 @@ const Home = ({
           currentDay={currentDay}
           setCurrentDay={setCurrentDay}
           today={today}
+          onDateClick={handleDateClick}
         />
       </Box>
 
@@ -85,6 +104,9 @@ const Home = ({
           currentDay={currentDay}
           onAddTransactionForm={handleAddTransactionForm}
           onSelectTransaction={handleSelectTransaction}
+          isMobile={isMobile}
+          open={isMobileDrawerOpen}
+          onClose={handleCloseMobileDrawer}
         />
         <TransactionForm
           onCloseForm={closeForm}
