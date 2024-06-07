@@ -1,40 +1,45 @@
-import { useContext, useEffect, useState } from "react";
-import { Transaction } from "./types";
-import "./App.css";
-import Home from "./pages/Home";
-import Report from "./pages/Report";
-import NoMatch from "./pages/NoMatch";
-import AppLayout from "./components/layout/AppLayout";
-import { theme } from "./theme/theme";
-import { db } from "./firebase";
-import { formatMonth } from "./utils/formatting";
-
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { ReactNode, createContext, useContext, useState } from "react";
+import { Transaction } from "../types";
+import { useMediaQuery, useTheme } from "@mui/material";
+import { Schema } from "../validations/schema";
 import {
   addDoc,
   collection,
   deleteDoc,
   doc,
-  getDocs,
   updateDoc,
 } from "firebase/firestore";
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import { Schema } from "./validations/schema";
-import { AppContextProvider } from "./context/AppContext";
-import { isFireStoreError } from "./utils/errorHandling";
+import { db } from "../firebase";
+import { isFireStoreError } from "../utils/errorHandling";
 
-function App() {
+interface AppContextType {
+  transactions: Transaction[];
+  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
+  currentMonth: Date;
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  isMobile: boolean;
+  onSaveTransaction: (transaction: Schema) => Promise<void>;
+  onDeleteTransaction: (
+    transactionIds: string | readonly string[]
+  ) => Promise<void>;
+  onUpdateTransaction: (
+    transaction: Schema,
+    transactionId: string
+  ) => Promise<void>;
+}
+
+export const AppContext = createContext<AppContextType | undefined>(undefined);
+
+export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
 
-  // 一月分のデータ取得
-  const monthlyTransactions = transactions.filter((transaction) => {
-    return transaction.date.startsWith(formatMonth(currentMonth));
-  });
-
-  // 取引を保存する処理
-  const handleSaveTransaction = async (transaction: Schema) => {
+  const onSaveTransaction = async (transaction: Schema) => {
     console.log(transaction);
     try {
       // firestoreにデータを保存
@@ -65,7 +70,7 @@ function App() {
   };
 
   // 削除処理
-  const handleDeleteTransaction = async (
+  const onDeleteTransaction = async (
     transactionIds: string | readonly string[]
   ) => {
     try {
@@ -95,7 +100,7 @@ function App() {
   };
 
   // 更新処理
-  const handleUpdateTransaction = async (
+  const onUpdateTransaction = async (
     transaction: Schema,
     transactionId: string
   ) => {
@@ -119,43 +124,30 @@ function App() {
   };
 
   return (
-    <AppContextProvider>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Router>
-          <Routes>
-            <Route path="/" element={<AppLayout />}>
-              <Route
-                index
-                element={
-                  <Home
-                    monthlyTransactions={monthlyTransactions}
-                    setCurrentMonth={setCurrentMonth}
-                    onSaveTransaction={handleSaveTransaction}
-                    onDeleteTransaction={handleDeleteTransaction}
-                    onUpdateTransaction={handleUpdateTransaction}
-                  />
-                }
-              />
-              <Route
-                path="/report"
-                element={
-                  <Report
-                    currentMonth={currentMonth}
-                    setCurrentMonth={setCurrentMonth}
-                    monthlyTransactions={monthlyTransactions}
-                    isLoading={isLoading}
-                    onDeleteTransaction={handleDeleteTransaction}
-                  />
-                }
-              />
-              <Route path="*" element={<NoMatch />} />
-            </Route>
-          </Routes>
-        </Router>
-      </ThemeProvider>
-    </AppContextProvider>
+    <AppContext.Provider
+      value={{
+        transactions,
+        setTransactions,
+        currentMonth,
+        setCurrentMonth,
+        isLoading,
+        setIsLoading,
+        isMobile,
+        onDeleteTransaction,
+        onSaveTransaction,
+        onUpdateTransaction,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
   );
-}
+};
 
-export default App;
+// undefinedを弾く
+export const useAppContext = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error("グローバルなデータはプロバイダーの中で取得して下さい。");
+  }
+  return context;
+};
