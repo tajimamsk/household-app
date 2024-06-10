@@ -11,10 +11,12 @@ import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
 import { Palette } from "@mui/icons-material";
 import { useTheme } from "@mui/material";
 import { isSameMonth } from "date-fns";
+import useMonthlyTransactions from "../hooks/useMonthlyTransactions";
+import { useAppContext } from "../context/AppContext";
 
 interface CalendarProps {
-  monthlyTransactions: Transaction[];
-  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
+  // monthlyTransactions: Transaction[];
+  // setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
   currentDay: string;
   setCurrentDay: React.Dispatch<React.SetStateAction<string>>;
   today: string;
@@ -22,18 +24,21 @@ interface CalendarProps {
 }
 
 const Calendar = ({
-  monthlyTransactions,
-  setCurrentMonth,
+  // monthlyTransactions,
+  // setCurrentMonth,
   currentDay,
   setCurrentDay,
   today,
   onDateClick,
 }: CalendarProps) => {
+  const monthlyTransactions = useMonthlyTransactions();
+  const { setCurrentMonth } = useAppContext();
+
   const theme = useTheme();
 
   // 月の取引データ
   const dailyBalances = calculateDailyBalances(monthlyTransactions);
-  console.log(dailyBalances);
+  // console.log(dailyBalances);
 
   // FullcCalendar用のイベントを生成
   const createCalendarEvents = (
@@ -55,7 +60,7 @@ const Calendar = ({
   const handleDatesSet = (datesSetInfo: DatesSetArg) => {
     const currentMonth = datesSetInfo.view.currentStart;
     // console.log(datesSetInfo.view.currentStart);
-    setCurrentMonth(datesSetInfo.view.currentStart);
+    setCurrentMonth(currentMonth);
     const todayDate = new Date();
     if (isSameMonth(todayDate, currentMonth)) {
       setCurrentDay(today);

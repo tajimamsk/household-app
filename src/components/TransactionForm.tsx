@@ -37,21 +37,21 @@ interface TransactionFormProps {
   onCloseForm: () => void;
   isEntryDrawerOpen: boolean;
   currentDay: string;
-  onSaveTransaction: (transaction: Schema) => Promise<void>;
   selectedTransaction: Transaction | null;
-  onDeleteTransaction: (
-    transactionId: string | readonly string[]
-  ) => Promise<void>;
   setSelectedTransaction: React.Dispatch<
     React.SetStateAction<Transaction | null>
   >;
-  onUpdateTransaction: (
-    transaction: Schema,
-    transactionId: string
-  ) => Promise<void>;
-  isMobile: boolean;
   isDialogOpen: boolean;
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  // onSaveTransaction: (transaction: Schema) => Promise<void>;
+  // onDeleteTransaction: (
+  //   transactionId: string | readonly string[]
+  // ) => Promise<void>;
+  // onUpdateTransaction: (
+  //   transaction: Schema,
+  //   transactionId: string
+  // ) => Promise<void>;
+  // isMobile: boolean;
 }
 
 type IncomeExpense = "income" | "expense";
@@ -65,18 +65,21 @@ const TransactionForm = ({
   onCloseForm,
   isEntryDrawerOpen,
   currentDay,
-  onSaveTransaction,
   selectedTransaction,
-  onDeleteTransaction,
   setSelectedTransaction,
-  onUpdateTransaction,
-  isMobile,
   isDialogOpen,
   setIsDialogOpen,
-}: TransactionFormProps) => {
-  // const context = useContext(AppContext);
-  const context = useAppContext();
-  console.log(context);
+}: // onSaveTransaction,
+// onDeleteTransaction,
+// onUpdateTransaction,
+// isMobile,
+TransactionFormProps) => {
+  const {
+    isMobile,
+    onSaveTransaction,
+    onDeleteTransaction,
+    onUpdateTransaction,
+  } = useAppContext();
 
   const formWidth = 320;
 
