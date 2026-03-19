@@ -1,3 +1,19 @@
+# household-app
+
+家計簿アプリです。
+
+## 使用言語・技術スタック
+
+- **言語**: TypeScript
+- **フレームワーク**: React
+- **UI ライブラリ**: Material UI (MUI)
+- **バックエンド**: Firebase (Firestore)
+- **フォーム管理**: React Hook Form + Zod
+- **カレンダー**: FullCalendar
+- **グラフ**: Chart.js / react-chartjs-2
+
+---
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
